@@ -15,6 +15,11 @@ firebase.initializeApp({
   appId: "1:956124354371:web:a150734724c6f2075bc1f6",
 });
 
+// const playLoginSound = () => {
+//   const audio = new Audio('/sounds/notify.mp3'); // Ensure sound.mp3 is in the public folder
+//   audio.play().catch(err => console.error("Error playing audio:", err));
+// };
+
 const messaging = firebase.messaging();
 
 // Store dynamic storeId
@@ -38,8 +43,9 @@ messaging.onBackgroundMessage((payload) => {
       body: payload.data.body || "Background Notification Body",
       icon: "/logo.png",
     };
-
     self.registration.showNotification(notificationTitle, notificationOptions);
+    // playLoginSound()
+
   } else {
     console.log(
       `❌ Store ID mismatch or not set: expected ${self.storeId}, got ${targetStoreId}`
