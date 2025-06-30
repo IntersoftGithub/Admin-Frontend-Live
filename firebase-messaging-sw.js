@@ -15,40 +15,42 @@ firebase.initializeApp({
   appId: "1:956124354371:web:a150734724c6f2075bc1f6",
 });
 
-// const playLoginSound = () => {
-//   const audio = new Audio('/sounds/notify.mp3'); // Ensure sound.mp3 is in the public folder
-//   audio.play().catch(err => console.error("Error playing audio:", err));
-// };
 
 const messaging = firebase.messaging();
 
 // Store dynamic storeId
 self.storeId = null;
+self.branchId = null;
 
-// Listen for postMessage to set storeId
+
 self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SET_STORE_ID") {
+  if (event.data?.type === "SET_STORE_ID") {
     self.storeId = event.data.storeId;
-    console.log("📦 Service worker received storeId:", self.storeId);
+    console.log("📦 Received storeId:", self.storeId);
+  }
+
+  if (event.data?.type === "SET_USER_ID") {
+    self.branchId = event.data.branchId;
+    console.log("👤 Received branchId:", self.branchId);
   }
 });
 
 messaging.onBackgroundMessage((payload) => {
   console.log("🔔 Background message received:", payload);
   const targetStoreId = payload.data?.storeId;
+  const targetUserId = payload.data?.branchId;
 
-  if (targetStoreId && self.storeId && targetStoreId === self.storeId) {
+  
+  if (targetStoreId === self.storeId && targetUserId === self.branchId) {
     const notificationTitle = payload.data.title || "New Notification";
     const notificationOptions = {
       body: payload.data.body || "Background Notification Body",
       icon: "/logo.png",
     };
     self.registration.showNotification(notificationTitle, notificationOptions);
-    // playLoginSound()
-
   } else {
-    console.log(
-      `❌ Store ID mismatch or not set: expected ${self.storeId}, got ${targetStoreId}`
-    );
+    console.log(`❌ Mismatch: storeId or branchId`);
+    console.log(`Expected: ${self.storeId} / ${self.branchId}`);
+    console.log(`Received: ${targetStoreId} / ${targetUserId}`);
   }
 });
